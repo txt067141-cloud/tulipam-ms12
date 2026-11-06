@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tulipam MS 🌷 — Chat mundial</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Arial}body{background:#17132b;color:#dbdee1;height:100vh;overflow:hidden}
+#auth{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 450px at 50% 0%,#a855f7 0%,#7c3aed 35%,transparent 70%),#17132b;padding:16px;z-index:10}
+.card{background:#262052;border-radius:20px;padding:26px;width:100%;max-width:400px}.card h1 span{color:#8B5CF6}.sub{color:#949ba4;font-size:13px;margin:4px 0 12px}
+.seg{display:flex;background:#17132b;border-radius:12px;padding:4px;margin-bottom:10px}.seg button{flex:1;padding:10px;border:0;border-radius:9px;background:transparent;color:#949ba4;font-weight:800;cursor:pointer}.seg button.on{background:#8B5CF6;color:#fff}
+label{font-size:11px;color:#b5bac1;font-weight:800;margin-top:10px;display:block}
+input,select,textarea{width:100%;padding:11px;background:#17132b;border:2px solid transparent;border-radius:10px;color:#fff;margin-top:4px;outline:none;font-size:14px}input:focus{border-color:#8B5CF6}
+.btn{width:100%;margin-top:12px;padding:12px;border:0;border-radius:10px;background:#8B5CF6;color:#fff;font-weight:800;cursor:pointer}.btn.green{background:#23a55a}.btn.ghost{background:#4a3f8f}.btn.red{background:#f23f43}
+#msg{border-radius:10px;padding:10px;font-size:13px;margin-top:10px;display:none}#msg.e{display:block;background:#f23f4333;border:1px solid #f23f43}#msg.o{display:block;background:#23a55a33;border:1px solid #23a55a}
+#app{display:none;height:100vh;grid-template-columns:64px 245px 1fr 250px}
+.servers{background:#17132b;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:8px}.srv{width:46px;height:46px;border-radius:50%;background:#262052;display:flex;align-items:center;justify-content:center;font-weight:900;cursor:pointer;overflow:hidden}.srv.on{background:#8B5CF6;border-radius:16px}.srv img{width:100%;height:100%;object-fit:cover}
+.side{background:#221c46;padding:12px 8px;overflow:auto;display:flex;flex-direction:column}.side h5{font-size:11px;color:#949ba4;margin:10px 4px 4px;display:flex;justify-content:space-between}.side h5 button{background:#322a68;color:#fff;border:0;border-radius:6px;padding:2px 8px;cursor:pointer}
+.chan{padding:7px 9px;border-radius:8px;color:#949ba4;cursor:pointer;font-size:14px;display:flex;gap:6px;align-items:center}.chan.on,.chan:hover{background:#3d3480;color:#fff}
+.main{background:#262052;display:flex;flex-direction:column;min-width:0}.top{height:54px;border-bottom:1px solid #17132b;display:flex;align-items:center;padding:0 12px;gap:8px}.acts{margin-left:auto;display:flex;gap:6px}
+.ib{background:#4a3f8f;color:#fff;border:0;border-radius:8px;padding:7px 9px;cursor:pointer}
+#msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.m{display:flex;gap:10px}.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;cursor:pointer;overflow:hidden;background:#8B5CF6}.av img{width:100%;height:100%;object-fit:cover}
+.big{font-size:38px;line-height:1.2}
+.sys{align-self:center;background:#17132b55;color:#949ba4;font-size:12px;padding:5px 12px;border-radius:14px}
+.comp{padding:10px;position:relative}.bx{background:#322a68;border-radius:10px;display:flex;padding:4px;align-items:center}.bx input{background:transparent;flex:1;border:0;padding:10px;color:#fff;outline:none}
+#pick{position:absolute;bottom:70px;left:10px;right:10px;background:#17132b;border:1px solid #4a3f8f;border-radius:12px;padding:10px;display:none;max-height:220px;overflow:auto}.stick{font-size:28px;cursor:pointer;padding:4px;border-radius:8px}.stick:hover{background:#322a68}
+.right{background:#221c46;padding:10px;overflow:auto}.rtabs{display:flex;gap:4px;margin-bottom:8px}.rtabs button{flex:1;padding:7px;border:0;border-radius:8px;background:#17132b;color:#949ba4;cursor:pointer;font-size:12px;font-weight:700}.rtabs button.on{background:#8B5CF6;color:#fff}
+.urow{display:flex;gap:8px;align-items:center;padding:6px;border-radius:8px;cursor:pointer}.urow:hover{background:#322a68}.urow small{color:#949ba4;font-size:11px}
+#videos{display:flex;gap:6px;padding:6px;flex-wrap:wrap}video{width:140px;border-radius:8px;background:#000}
+.t{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;padding:10px 18px;border-radius:10px;display:none;z-index:99}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:60;padding:12px}.modal.open{display:flex}.sheet{background:#262052;border-radius:16px;padding:20px;max-width:450px;width:100%;max-height:92vh;overflow:auto}
+.row{display:flex;gap:8px}.profhead{height:110px;border-radius:12px;margin:-20px -20px 0;background-size:cover;background-position:center;overflow:hidden}.profhead video{width:100%;height:100%;object-fit:cover}
+.stkrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:26px}
+.prev{width:64px;height:64px;border-radius:50%;object-fit:cover}
+@media(max-width:950px){#app{grid-template-columns:54px 1fr}.side,.right{display:none}}
+</style>
+</head>
+<body>
+<div id="auth"><div class="card">
+<h1>🌷 <span>Tulipam MS</span></h1><div class="sub">Chat mundial 🌍 • Fotos • Privados 🔒 • Traductor</div>
+<div class="seg"><button id="bL" class="on" onclick="tab('L')">Entrar</button><button id="bR" onclick="tab('R')">Crear cuenta</button></div>
+<div id="fL"><label>EMAIL</label><input id="li_e" type="email" placeholder="tucorreo@gmail.com"><label>CONTRASEÑA</label><input id="li_p" type="password"><button class="btn" id="btnL" onclick="login()">Entrar 🚀</button></div>
+<div id="fR" style="display:none"><label>NOMBRE</label><input id="rg_u" maxlength="20"><label>EMAIL</label><input id="rg_e" type="email"><label>CLAVE (min 4)</label><input id="rg_p" type="password"><button class="btn green" id="btnR" onclick="reg()">Crear mi cuenta ✨</button></div>
+<div id="msg"></div><button class="btn ghost" onclick="guest()">⚡ Probar como invitado</button>
+<div style="font-size:11px;color:#949ba4;text-align:center" id="modeT">detectando...</div></div></div>
+
+<div id="app">
+<div class="servers"><div class="srv on">P</div><div class="srv">🎮</div></div>
+<div class="side">
+<h5>TEXTO</h5><div id="tch"></div>
+<h5>🔒 PRIVADOS <button onclick="openM('chM')">+</button></h5><div id="pch"></div>
+<h5>💌 DMS <button onclick="openM('friendM')">+</button></h5><div id="dms"></div>
+<h5>🔊 VOZ <button onclick="joinV()">unirse</button></h5><div id="vch"></div>
+<div style="margin-top:auto;background:#232428;border-radius:10px;padding:8px;display:flex;gap:8px;align-items:center"><div class="av" id="myAv">?</div><div style="flex:1"><b id="me" style="font-size:13px">?</b><br><small id="mySt" style="color:#949ba4"></small></div><button class="ib" onclick="openProfile(true)">✏️</button><button class="ib" onclick="showSessions()" title="Mis sesiones">🔐</button><button class="ib" onclick="logout()">🚪</button></div>
+</div>
+<div class="main">
+<div class="top"><span id="ctIcon">#</span><b id="ct">general</b><span id="typing" style="color:#949ba4;font-size:12px"></span><span id="dmCallBtns" style="display:none;margin-left:8px"><button class="ib" onclick="callDM(false)" title="Llamar voz">📞</button><button class="ib" onclick="callDM(true)" title="Videollamada">🎥</button></span><div class="acts"><select id="lang" title="Mi idioma" style="width:auto;padding:6px;border-radius:8px;background:#4a3f8f;color:#fff;border:0"><option value="es">🇪🇸 ES</option><option value="en">🇺🇸 EN</option><option value="pt">🇧🇷 PT</option><option value="fr">🇫🇷 FR</option><option value="it">🇮🇹 IT</option><option value="de">🇩🇪 DE</option><option value="zh-CN">🇨🇳 中文</option><option value="ar">🇸🇦 AR</option></select><button class="ib" id="autoT" onclick="toggleAutoT()" title="Traducir mensajes">🌍</button><button class="ib" onclick="joinV()">📞</button><button class="ib" onclick="leaveV()">🔇</button></div></div>
+<div id="videos"></div><div id="msgs"></div>
+<div class="comp"><div id="pick"></div><div class="bx"><button class="ib" onclick="togglePick()">😀</button><input id="inp" maxlength="500" placeholder="Escribe..."><button class="ib" onclick="send()">➤</button></div></div>
+</div>
+<div class="right">
+<div class="rtabs"><button id="rt1" class="on" onclick="rtab('gente')">Gente</button><button id="rt2" onclick="rtab('amigos')">Amigos</button><button id="rt3" onclick="rtab('bots')">Bots</button></div>
+<div id="pane-gente"></div>
+<div id="pane-amigos" style="display:none"><button class="btn" onclick="openM('friendM')">＋ Agregar</button><div id="frList"></div><h5 style="font-size:11px;color:#949ba4;margin:8px 0">Solicitudes</h5><div id="frPend"></div></div>
+<div id="pane-bots" style="display:none"><button class="btn green" onclick="openM('botM')">🤖 Invitar bot</button><div id="botList"></div></div>
+</div></div>
+
+<div class="modal" id="profM"><div class="sheet"><div class="profhead" id="pfHead"></div>
+<div style="display:flex;gap:10px;align-items:flex-end;margin-top:-28px"><div class="av" id="pfAv" style="width:68px;height:68px;font-size:28px;border:4px solid #262052">?</div><div><h2 id="pfName">?</h2><small id="pfStatus" style="color:#949ba4"></small></div></div>
+<div id="pfBio" style="font-size:13px;background:#17132b;border-radius:8px;padding:8px;margin-top:8px"></div>
+<div class="stkrow" id="pfStk"></div><div id="pfVid"></div>
+<div class="row"><button class="btn" id="pfDm" onclick="openDMfromProf()">💌 DM</button><button class="btn ghost" onclick="closeM('profM')">Cerrar</button></div>
+<div id="pfEdit" style="display:none;border-top:1px solid #4a3f8f;margin-top:10px;padding-top:8px">
+<label>NOMBRE</label><input id="e_name" maxlength="20"><label>BIO (puedes usar emojis 🎉)</label><input id="e_bio" maxlength="300">
+<label>📸 FOTO DE PERFIL REAL</label><input id="e_avfile" type="file" accept="image/*"><div><img id="avPrev" class="prev" style="display:none"></div>
+<label>🖼️ BANNER / 🎥 VIDEO DE PERFIL</label><input id="e_banfile" type="file" accept="image/*,video/*"><div id="banPrev"></div>
+<label>EMOJI (si no tienes foto)</label><select id="e_emoji"><option>😎</option><option>🎮</option><option>🐱</option><option>🔥</option><option>🤖</option><option>💜</option></select>
+<label>STICKERS DEL PERFIL (elige)</label><div class="stkrow" id="stkPick"></div>
+<label>COLOR</label><input id="e_color" type="color" value="#8B5CF6">
+<div class="row"><button class="btn green" onclick="saveProf()">Guardar ✨</button><button class="btn ghost" onclick="closeM('profM')">Cerrar</button></div>
+</div></div></div>
+<div class="modal" id="friendM"><div class="sheet"><h3>👥 Agregar amigo</h3><label>EMAIL</label><input id="frEmail"><div class="row"><button class="btn" onclick="addFriend()">Enviar</button><button class="btn ghost" onclick="closeM('friendM')">Cerrar</button></div></div></div>
+<div class="modal" id="botM"><div class="sheet"><h3>🤖 Invitar bot</h3><label>NOMBRE</label><input id="b_name"><label>EMOJI</label><select id="b_emoji"><option>🤖</option><option>🎵</option><option>🎮</option><option>🛡️</option></select><label>RESPUESTA</label><input id="b_reply"><div class="row"><button class="btn green" onclick="addBot()">Invitar ✅</button><button class="btn ghost" onclick="closeM('botM')">Cerrar</button></div></div></div>
+<div class="modal" id="chM"><div class="sheet"><h3>🔒 Crear canal privado</h3><label>NOMBRE</label><input id="c_name" placeholder="Ej: solo-nosotros"><label>CONTRASEÑA (opcional, vacío = solo invitados)</label><input id="c_pass" type="password" placeholder="1234"><div class="row"><button class="btn" onclick="addChan()">Crear</button><button class="btn ghost" onclick="closeM('chM')">Cerrar</button></div></div></div>
+
+<div class="modal" id="sessM"><div class="sheet"><h3>🔐 Mis sesiones</h3><p style="font-size:12px;color:#949ba4">Aquí ves dónde entraste. Puedes salir de un dispositivo o de todos.</p><div id="sessList"></div><h4 style="margin-top:10px">🕘 Historial de entradas</h4><div id="loginHist" style="font-size:12px"></div><div class="row"><button class="btn red" onclick="logoutAll()">Salir de todos</button><button class="btn ghost" onclick="closeM('sessM')">Cerrar</button></div></div></div>
+<div class="modal" id="callM"><div class="sheet" style="text-align:center"><h2>📞 Llamada entrante</h2><h3 id="callFrom">?</h3><div class="row"><button class="btn green" onclick="acceptCall()">Aceptar ✅</button><button class="btn red" onclick="closeM('callM')">Rechazar</button></div></div></div>
+<div class="t" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const toast=m=>{const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)};
+const show=(t,ok)=>{const m=$('msg');m.style.display=t?'block':'none';m.className=t?(ok?'o':'e'):'';m.textContent=t||''};
+const escN=s=>String(s??'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+const EMOJIS=['😀','😂','🔥','🎮','❤️','👍','🎉','😎','🤖','💜','⚡','🐱','🐶','🌈','🍕','🎵','😭','👏','🛡️','💌'];
+const STKS=['🔥','🎮','💜','⚡','🐱','🤖','🌈','🍕','🎵','👑','💎','🚀'];
+let MODE='local',token=localStorage.getItem('tulipam_token'),me=null,myId=null,socket=null,room='0:mundo',view={type:'chan'},curV='voz-general',peers={},ls=null,withV=false,allUsers=[],myBots=[],friends=[],privs=[],selStk=[];
+const TCH=['mundo','general','ayuda','memes','internacional'],VCH=['voz-general','voz-gaming'];
+function tab(t){$('bL').classList.toggle('on',t==='L');$('bR').classList.toggle('on',t==='R');$('fL').style.display=t==='L'?'block':'none';$('fR').style.display=t==='R'?'block':'none';show('')}
+function openM(i){$(i).classList.add('open')}function closeM(i){$(i).classList.remove('open')}
+let AC=null;function beep(k){if(!$('snd').checked)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=k==='dm'?880:660;g.gain.value=.12;o.start();o.stop(AC.currentTime+.18)}catch{}}
+(async()=>{try{const r=await fetch('/api/health',{signal:AbortSignal.timeout(2500)});if(r.ok){MODE='online';$('modeT').textContent='🟢 en línea'}}catch{MODE='local';$('modeT').textContent='🟡 local'}if(token&&MODE==='online')start()})();
+async function reg(){const u=$('rg_u').value.trim(),e=$('rg_e').value.trim(),p=$('rg_p').value;if(u.length<2)return show('⛔ Nombre min 2');if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))return show('⛔ Email inválido');if(p.length<4)return show('⛔ Clave min 4');const b=$('btnR');b.disabled=true;try{if(MODE==='online'){const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({u,e,p})});const j=await r.json();if(!r.ok)throw new Error(j.error);token=j.token;localStorage.setItem('tulipam_token',token);show('✅ '+j.msg,true);setTimeout(start,700)}else{let us=JSON.parse(localStorage.getItem('tulipam_users')||'[]');if(us.find(x=>x.e===e.toLowerCase()))throw new Error('Ya existe');us.push({id:'l'+Date.now(),u,e:e.toLowerCase(),p:btoa(p)});localStorage.setItem('tulipam_users',JSON.stringify(us));localStorage.setItem('tulipam_me',JSON.stringify({id:us[us.length-1].id,u,e:e.toLowerCase()}));show('✅ ¡Creada!',true);setTimeout(startLocal,700)}}catch(er){show('⛔ '+er.message)}b.disabled=false}
+async function login(){const e=$('li_e').value.trim(),p=$('li_p').value;if(!e||!p)return show('⛔ Completa todo');const b=$('btnL');b.disabled=true;try{if(MODE==='online'){const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({e,p})});const j=await r.json();if(!r.ok)throw new Error(j.error);token=j.token;localStorage.setItem('tulipam_token',token);start()}else{const us=JSON.parse(localStorage.getItem('tulipam_users')||'[]');const f=us.find(x=>x.e===e.toLowerCase()&&x.p===btoa(p));if(!f)throw new Error('No existe. Crea cuenta.');localStorage.setItem('tulipam_me',JSON.stringify({id:f.id,u:f.u,e:f.e}));startLocal()}}catch(er){show('⛔ '+er.message)}b.disabled=false}
+function guest(){localStorage.setItem('tulipam_me',JSON.stringify({id:'l'+Date.now(),u:'Invitado'+Math.floor(Math.random()*999)}));MODE='local';startLocal()}
+function logout(){localStorage.clear();location.reload()}
+function avHtml(p,name,sz){sz=sz||38;if(p&&p.avatarUrl)return `<div class="av" style="width:${sz}px;height:${sz}px"><img src="${p.avatarUrl}"></div>`;return `<div class="av" style="background:${(p&&p.color)||'#8B5CF6'};width:${sz}px;height:${sz}px">${(p&&p.emoji)||(name||'?')[0]}</div>`}
+// render
+function chans(){$('tch').innerHTML=TCH.map(c=>`<div class="chan ${view.type==='chan'&&room==='0:'+c?'on':''}" onclick="goR('${c}')"># ${c}</div>`).join('');$('pch').innerHTML=privs.map(c=>`<div class="chan ${view.room==='p:'+c.id?'on':''}" onclick="joinPriv('${c.id}','${escN(c.name)}',${c.locked?1:0})">🔒 ${escN(c.name)}</div>`).join('')||'<div style=\"font-size:11px;color:#949ba4\">Sin privados. Crea uno +</div>';$('vch').innerHTML=VCH.map(c=>`<div class="chan" onclick="curV='${c}';joinV()">🔊 ${c}</div>`).join('');renderDMs()}
+function goR(c){curDM=null;const _dc=$('dmCallBtns');if(_dc)_dc.style.display='none';view={type:'chan'};room='0:'+c;$('ct').textContent=c;$('ctIcon').textContent='#';chans();socket?socket.emit('join',room,hist):hist(JSON.parse(localStorage.getItem('lc_'+room)||'[]'))}
+function renderDMs(){const fr=MODE==='online'?friends:JSON.parse(localStorage.getItem('lf')||'[]');$('dms').innerHTML=fr.map(f=>`<div class="chan" onclick="openDM('${f.id||f.u}','${escN(f.u)}')">💌 ${escN(f.u)}</div>`).join('')||'<div style=\"font-size:11px;color:#949ba4\">Sin DMs</div>'}
+function hist(a){$('msgs').innerHTML=(a||[]).map(m=>msgHtml(m)).join('')||'<div class="sys">👋 ¡Escribe primero!</div>';$('msgs').scrollTop=1e6}
+function msgHtml(m){const clean=(m.text||'').replace(/<[^>]+>/g,'');const safeOrig=clean.replace(/"/g,'&quot;').slice(0,400);const big=/^(\p{Emoji}|[\u{1F000}-\u{1FAFF}]){1,3}$/u.test(clean)?'<div class="big" data-orig="'+safeOrig+'">'+m.text+'</div>':'<div data-orig="'+safeOrig+'">'+m.text+'</div>';return `<div class="m"><div onclick="showProfByName('${escN(m.u)}')"><div class="av" style="background:#4a3f8f">${escN((m.u||'?')[0])}</div></div><div style="min-width:0;flex:1"><b>${escN(m.u)}</b> <small style="color:#949ba4">${m.t||''}</small> <button class="ib" style="padding:2px 6px;font-size:11px" onclick="translateOne(this)" title="Traducir a mi idioma">🌍</button>${big}</div></div>`}
+
+async function addM(m,dm){beep(dm?'dm':'msg');const d=document.createElement('div');d.innerHTML=msgHtml(m);$('msgs').appendChild(d.firstChild);$('msgs').scrollTop=1e6;if(autoT){const el=$('msgs').lastChild.querySelector('[data-orig]');if(el){const o=el.getAttribute('data-orig');el.innerHTML=await tr(o,myLang)}}}
+function send(){const v=$('inp').value.trim();if(!v)return;$('inp').value='';$('pick').style.display='none';if(view.type==='dm')sendDM(view.id,v);else if(MODE==='online')socket.emit('message',{room:view.room||room,text:v});else addLocal(v)}
+$('inp').addEventListener('keydown',e=>{if(e.key==='Enter')send();else socket?.emit('typing',view.room||room)});
+function togglePick(){const p=$('pick');p.style.display=p.style.display==='block'?'none':'block';if(p.style.display==='block')p.innerHTML='<b>Emojis y stickers</b><br>'+EMOJIS.map(e=>`<span class="stick" onclick="ins('${e}')">${e}</span>`).join('')+'<br><b>Stickers grandes</b><br>'+STKS.map(e=>`<span class="stick" onclick="sendStk('${e}')"> ${e} </span>`).join('')}
+function ins(e){$('inp').value+=e;$('inp').focus()}
+function sendStk(e){$('pick').style.display='none';if(view.type==='dm')sendDM(view.id,e);else if(MODE==='online')socket.emit('message',{room:view.room||room,text:e});else addLocal(e)}
+function addLocal(t){const m={u:me.u,text:t.replace(/</g,'&lt;'),t:'ahora'};addM(m);let a=JSON.parse(localStorage.getItem('lc_'+room)||'[]');a.push(m);localStorage.setItem('lc_'+room,JSON.stringify(a))}
+// online
+async function start(){$('auth').style.display='none';$('app').style.display='grid';const r=await fetch('/api/me',{headers:{Authorization:'Bearer '+token}});if(!r.ok){localStorage.clear();location.reload();return}me=await r.json();const pr=await(await fetch('/api/profile',{headers:{Authorization:'Bearer '+token}})).json();myId=pr.id;me={...me,...pr};paintMe();chans();await loadAll();socket=io({auth:{token}});socket.on('message',m=>{if(view.type!=='dm')addM(m)});socket.on('dm-receive',dm=>{if(view.type==='dm'&&((dm.from===view.id)||dm.from===myId))addM({u:dm.fromName,text:dm.text,t:dm.t},true);else toast('💌 DM de '+dm.fromName);beep('dm')});socket.on('typing',u=>{$('typing').textContent=u+' escribiendo...';setTimeout(()=>$('typing').textContent='',1500)});socket.on('presence',()=>loadUsers());socket.on('incoming-call',d=>{pendingCall=d;const cf=$('callFrom');if(cf)cf.textContent=d.fromName;$('callM').classList.add('open');beep('dm')});socket.on('friend-req',({from})=>{toast('👥 Solicitud de '+from);loadFriends()});socket.on('voice-new-peer',({id})=>mkPeer(id,true));socket.on('voice-peer-left',({id})=>{peers[id]?.close();delete peers[id];document.getElementById('v-'+id)?.remove()});socket.on('signal',async({from,data})=>{let pc=peers[from]||mkPeer(from,false);try{if(data.sdp){await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));if(data.sdp.type==='offer'){const a=await pc.createAnswer();await pc.setLocalDescription(a);socket.emit('signal',{to:from,data:{sdp:pc.localDescription}})}}else if(data.ice)await pc.addIceCandidate(new RTCIceCandidate(data.ice))}catch{}});socket.emit('join',room,hist)}
+async function loadAll(){await loadUsers();await loadFriends();await loadBots();await loadPriv()}
+async function loadUsers(){allUsers=await(await fetch('/api/users',{headers:{Authorization:'Bearer '+token}})).json();$('pane-gente').innerHTML=allUsers.map(u=>{const p=u.p||{};return `<div class="urow" onclick="showProf('${u.id}')">${avHtml(p,u.u,30)}<div><b style="font-size:13px">${escN(u.u)}</b><br><small>${escN(p.status||'en línea')}</small></div></div>`}).join('')}
+function paintMe(){$('me').textContent=me.u;$('mySt').textContent=me.status||'en línea';$('myAv').innerHTML=me.avatarUrl?`<img src="${me.avatarUrl}">`:(me.emoji||me.u[0]);$('myAv').style.background=me.color||'#8B5CF6'}
+async function showSessions(){openM('sessM');const r=await fetch('/api/sessions',{headers:{Authorization:'Bearer '+token}});const j=await r.json();$('sessList').innerHTML=(j.sessions||[]).map(s=>`<div class="urow"><div style="flex:1"><b style="font-size:12px">${new Date(s.created).toLocaleString()}</b><br><small>${escN(s.ip||'')} • ${escN((s.agent||'').slice(0,40))} ${s.active?'🟢':'⚫'}</small></div></div>`).join('')||'Sin sesiones';$('loginHist').innerHTML=(j.history||[]).map(h=>`<div>• ${escN(h.event)} — ${escN(h.ip||'')} — ${new Date(h.time).toLocaleString()}</div>`).join('')||'Sin historial'}
+async function logoutAll(){await fetch('/api/logout-all',{method:'POST',headers:{Authorization:'Bearer '+token}});localStorage.clear();location.reload()}
+async function loadFriends(){const j=await(await fetch('/api/friends',{headers:{Authorization:'Bearer '+token}})).json();friends=j.friends;$('frList').innerHTML=friends.map(f=>`<div class="urow">${avHtml(f.p,f.u,30)}<div style="flex:1"><b>${escN(f.u)}</b></div><button class="ib" onclick="openDM('${f.id}','${escN(f.u)}')">💌</button><button class="ib" onclick="openDM('${f.id}','${escN(f.u)}');setTimeout(()=>callDM(false),600)">📞</button></div>`).join('');$('frPend').innerHTML=j.pending.map(p=>`<div class="urow"><b>${escN(p.fromName)}</b><button class="ib" onclick="acceptF('${p.from}')">OK</button></div>`).join('');renderDMs()}
+async function addFriend(){const email=$('frEmail').value.trim();const r=await fetch('/api/friends/request',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({email})});const j=await r.json();toast((r.ok?'✅ ':'⛔ ')+(j.msg||j.error));if(r.ok)closeM('friendM')}
+async function acceptF(f){await fetch('/api/friends/accept',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({from:f})});loadFriends()}
+async function loadBots(){myBots=await(await fetch('/api/bots',{headers:{Authorization:'Bearer '+token}})).json();$('botList').innerHTML=myBots.map(b=>`<div class="urow"><div class="av" style="width:30px;height:30px">${b.emoji}</div><div style="flex:1"><b>${escN(b.name)}</b><br><small>${escN(b.reply).slice(0,50)}</small></div></div>`).join('')}
+async function addBot(){const r=await fetch('/api/bots',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({name:$('b_name').value,emoji:$('b_emoji').value,reply:$('b_reply').value})});const j=await r.json();toast(r.ok?'🤖 ¡Bot invitado!':'⛔ '+j.error);if(r.ok){closeM('botM');loadBots()}}
+async function loadPriv(){privs=await(await fetch('/api/channels',{headers:{Authorization:'Bearer '+token}})).json();chans()}
+async function addChan(){const r=await fetch('/api/channels',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({name:$('c_name').value,password:$('c_pass').value})});const j=await r.json();if(!r.ok)return toast('⛔ '+j.error);closeM('chM');loadPriv();toast('🔒 Canal creado')}
+async function joinPriv(id,name,locked){let pass='';if(locked){pass=prompt('🔒 Contraseña de #'+name)||''}const r=await fetch('/api/channels/'+id+'/join',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({password:pass})});const j=await r.json();if(!r.ok)return toast('⛔ '+j.error);view={type:'chan',room:'p:'+id};$('ct').textContent='🔒 '+name;$('ctIcon').textContent='🔒';chans();socket.emit('join','p:'+id,hist)}
+let curDM=null,pendingCall=null;
+async function openDM(id,name){curDM={id,name};$('dmCallBtns').style.display='inline';view={type:'dm',id,name};$('ct').textContent='💌 '+name;$('ctIcon').textContent='💌';chans();const h=await(await fetch('/api/dm/'+id,{headers:{Authorization:'Bearer '+token}})).json();hist(h.map(d=>({u:d.fromName+(d.from===myId?' (tú)':''),text:d.text,t:d.t})))}
+function openDMfromProf(){closeM('profM');if(window._prof)openDM(window._prof.id,window._prof.u)}
+async function sendDM(to,text){socket.emit('dm-send',{to,text})}
+// perfiles con foto/video/stickers
+async function showProf(id){const p=await(await fetch('/api/profile/'+id,{headers:{Authorization:'Bearer '+token}})).json();window._prof={id:p.id,u:p.u};$('pfName').textContent=p.u;$('pfStatus').textContent=p.status||'';$('pfAv').innerHTML=p.avatarUrl?`<img src="${p.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(p.emoji||p.u[0]);$('pfAv').style.background=p.color||'#8B5CF6';$('pfHead').innerHTML=p.videoUrl?`<video src="${p.videoUrl}" autoplay muted loop playsinline></video>`:(p.bannerUrl?` <div style="background:url('${p.bannerUrl}') center/cover;height:100%"></div>`:'');$('pfHead').style.background=p.bannerUrl||p.videoUrl?'':'linear-gradient(90deg,'+(p.color||'#8B5CF6')+',#17132b)';$('pfBio').textContent=p.bio||'Sin bio';$('pfStk').innerHTML=(p.stickers||[]).map(s=>s.startsWith('http')?`<img src="${s}" style="width:40px;height:40px">`:s).join('');$('pfVid').innerHTML='';const mine=id===myId;$('pfEdit').style.display=mine?'block':'none';if(mine){$('e_name').value=p.u;$('e_bio').value=p.bio||'';$('e_emoji').value='😎';$('e_color').value=/^#[0-9a-f]{6}$/i.test(p.color||'')?p.color:'#8B5CF6';selStk=[...(p.stickers||[])];paintStkPick()}openM('profM')}
+function showProfByName(){toast('Abre Gente para ver perfiles')}
+function paintStkPick(){$('stkPick').innerHTML=STKS.map(s=>`<span class="stick" style="background:${selStk.includes(s)?'#8B5CF6':'transparent'}" onclick="togStk('${s}')">${s}</span>`).join('')}
+function togStk(s){selStk=selStk.includes(s)?selStk.filter(x=>x!==s):[...selStk,s].slice(0,12);paintStkPick()}
+function openProfile(){showProf(myId)}
+async function saveProf(){const fd={u:$('e_name').value,bio:$('e_bio').value,emoji:$('e_emoji').value,color:$('e_color').value,stickers:selStk};const r=await fetch('/api/profile',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(fd)});const j=await r.json();if(j.u)me.u=j.u;me={...me,...j.profile};
+const af=$('e_avfile').files[0];if(af){const f=new FormData();f.append('img',af);const ur=await(await fetch('/api/profile/avatar',{method:'POST',headers:{Authorization:'Bearer '+token},body:f})).json();if(ur.avatarUrl)me.avatarUrl=ur.avatarUrl}
+const bf=$('e_banfile').files[0];if(bf){const f=new FormData();f.append('img',bf);const ur=await(await fetch('/api/profile/banner',{method:'POST',headers:{Authorization:'Bearer '+token},body:f})).json();if(ur.url){if(ur.isVideo)me.videoUrl=ur.url;else me.bannerUrl=ur.url}}
+paintMe();loadUsers();closeM('profM');toast('✨ Perfil con foto/video guardado')}
+$('e_avfile')?.addEventListener?.('change',()=>{});
+// voz
+async function mic(){if(ls)return ls;ls=await navigator.mediaDevices.getUserMedia({audio:true,video:withV});const v=document.createElement('video');v.muted=true;v.autoplay=true;v.srcObject=ls;v.id='v-local';if(!$('v-local'))$('videos').appendChild(v);return ls}
+function mkPeer(id,init){if(peers[id])return peers[id];const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});peers[id]=pc;mic().then(s=>{s.getTracks().forEach(t=>pc.addTrack(t,s));if(init&&socket.id<id)pc.createOffer().then(o=>pc.setLocalDescription(o)).then(()=>socket.emit('signal',{to:id,data:{sdp:pc.localDescription}}))});pc.onicecandidate=e=>{if(e.candidate)socket.emit('signal',{to:id,data:{ice:e.candidate}})};pc.ontrack=e=>{let v=document.getElementById('v-'+id);if(!v){v=document.createElement('video');v.id='v-'+id;v.autoplay=true;$('videos').appendChild(v)}v.srcObject=e.streams[0]};return pc}
+async function joinV(){if(MODE!=='online')return toast('⚠️ Necesita backend');await mic();socket.emit('voice-join',curV);toast('🎙️ En voz')}
+async function callDM(video){if(!curDM)return toast('Abre un DM primero');withV=!!video;await mic();const conv=[myId,curDM.id].sort().join('__');socket.emit('call-user',{to:curDM.id});socket.emit('voice-join','call_'+conv);toast(video?'🎥 Videollamando a '+curDM.name+'...':'📞 Llamando a '+curDM.name+'...')}
+function acceptCall(){if(!pendingCall)return;closeM('callM');openDM(pendingCall.from,pendingCall.fromName);socket.emit('voice-join','call_'+[myId,pendingCall.from].sort().join('__'))}
+function leaveV(){socket?.emit('voice-leave');Object.values(peers).forEach(p=>p.close());peers={};$('videos').innerHTML='';if(ls){ls.getTracks().forEach(t=>t.stop());ls=null}}
+let autoT=false,myLang='es';
+function toggleAutoT(){autoT=!autoT;$('autoT').style.background=autoT?'#8B5CF6':'#4a3f8f';toast(autoT?'🌍 Traducción ON → '+myLang:'🌍 Traducción OFF');if(autoT)translateAll()}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='lang'){myLang=e.target.value;if(autoT)translateAll()}});
+async function tr(q,to){try{const r=await fetch('/api/translate?q='+encodeURIComponent(String(q||'').replace(/<[^>]+>/g,''))+'&to='+to);const j=await r.json();return j.text||q}catch{return q}}
+async function translateAll(){for(const el of document.querySelectorAll('#msgs .m [data-orig]')){const o=el.getAttribute('data-orig');if(o)el.innerHTML=await tr(o,myLang)}}
+async function translateOne(btn,lang){const box=btn.parentElement.querySelector('[data-orig]');if(!box)return;const o=box.getAttribute('data-orig')||box.innerHTML;box.innerHTML='⏳...';box.innerHTML=await tr(o,lang||myLang)}
+function rtab(t){['gente','amigos','bots'].forEach(k=>$('pane-'+k).style.display=k===t?'block':'none')}
+function startLocal(){$('auth').style.display='none';$('app').style.display='grid';me=JSON.parse(localStorage.getItem('tulipam_me'));$('me').textContent=me.u;$('myAv').textContent=me.u[0];chans();hist([]);toast('🟡 Modo local')}
+document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('open')});
+$('e_avfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('avPrev').src=r.result;$('avPrev').style.display='block'};r.readAsDataURL(f)});
+$('e_banfile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('banPrev').innerHTML=f.type.startsWith('video')?`<video src="${r.result}" style="width:100%;border-radius:8px" controls></video>`:`<img src="${r.result}" style="width:100%;border-radius:8px">`};r.readAsDataURL(f)});
+</script>
+</body></html>
